@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../Services/authService';
-import { UserPlus, Mail, Lock, User, Phone, Briefcase, Loader2, Chrome } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Phone, Briefcase, Loader2, Chrome, Eye, EyeOff } from 'lucide-react';
 
 const GOOGLE_CLIENT_ID = '120955983800-kvvgasi9uag3rmgpr29qnrhrsvjgpsi7.apps.googleusercontent.com';
 
 const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', mobile: '', role: 'USER' });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -127,14 +128,21 @@ const Register = () => {
                     <div className="relative">
                         <Lock className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             name="password"
                             value={formData.password}
                             placeholder="Password"
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition"
+                            className="w-full pl-10 pr-12 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none transition"
                             onChange={handleChange}
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition"
+                        >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
                     <div className="relative">
                         <Briefcase className="absolute left-3 top-3.5 text-gray-400 pointer-events-none" size={18} />
