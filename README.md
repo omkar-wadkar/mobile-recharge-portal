@@ -37,8 +37,8 @@ npm run dev
 - **Password**: `admin123`
 
 ### Company Login
-- **Email**: `manager@airtel.com`
-- **Password**: `password123`
+- **Email**: `airtel@gmail.com`
+- **Password**: `password`
 
 ### Payment Gateway
 - **Success Card**: `4111111111111111`
