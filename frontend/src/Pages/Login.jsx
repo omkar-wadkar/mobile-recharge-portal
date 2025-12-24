@@ -4,7 +4,7 @@ import authService from '../Services/authService';
 import ForgotPasswordModal from '../Components/ForgotPasswordModal';
 import { LogIn, Mail, Lock, Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
 
-const GOOGLE_CLIENT_ID = '120955983800-kvvgasi9uag3rmgpr29qnrhrsvjgpsi7.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Login = () => {
     const [credentials, setCredentials] = useState({ email: '', password: '' });

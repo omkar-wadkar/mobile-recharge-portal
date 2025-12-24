@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import authService from '../Services/authService';
 import { UserPlus, Mail, Lock, User, Phone, Briefcase, Loader2, Chrome, Eye, EyeOff } from 'lucide-react';
 
-const GOOGLE_CLIENT_ID = '120955983800-kvvgasi9uag3rmgpr29qnrhrsvjgpsi7.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', mobile: '', role: 'USER' });
