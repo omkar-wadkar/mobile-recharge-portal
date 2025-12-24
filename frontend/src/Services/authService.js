@@ -48,6 +48,18 @@ const authService = {
             localStorage.setItem('token', response.data.token);
         }
         return response.data;
+    },
+    forgotPassword: async (email) => {
+        const response = await axios.post(`${API_URL}/forgot-password`, { email });
+        return response.data;
+    },
+    verifyForgotOTP: async (email, otp) => {
+        const response = await axios.post(`${API_URL}/verify-forgot-otp`, { email, otp });
+        return response.data;
+    },
+    resetPassword: async (resetToken, newPassword) => {
+        const response = await axios.post(`${API_URL}/reset-password`, { resetToken, newPassword });
+        return response.data;
     }
 };
 

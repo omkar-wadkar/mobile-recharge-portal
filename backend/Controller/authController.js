@@ -125,3 +125,60 @@ exports.verifyOTP = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const otp = generateOTP(email);
+        await sendEmailOTP(email, otp);
+
+        res.json({ message: 'OTP sent to your email' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.verifyForgotOTP = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (verifyOTP(email, otp)) {
+            // Generate a short-lived token for password reset
+            const resetToken = jwt.sign(
+                { id: user._id, scope: 'password_reset' },
+                process.env.JWT_SECRET,
+                { expiresIn: '15m' }
+            );
+            return res.json({ message: 'OTP verified', resetToken });
+        }
+        res.status(400).json({ message: 'Invalid or expired OTP' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { resetToken, newPassword } = req.body;
+
+        const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+        if (decoded.scope !== 'password_reset') {
+            return res.status(401).json({ message: 'Invalid token scope' });
+        }
+
+        const user = await User.findById(decoded.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.password = newPassword;
+        await user.save();
+
+        res.json({ message: 'Password reset successful' });
+    } catch (error) {
+        res.status(500).json({ message: 'Invalid or expired token' });
+    }
+};
