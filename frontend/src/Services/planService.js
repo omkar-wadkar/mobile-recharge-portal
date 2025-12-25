@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_USER_URL = 'http://localhost:5000/api/user/plans';
-const API_COMP_URL = 'http://localhost:5000/api/company/plans';
+const API_USER_URL = 'https://mobile-recharge-portal-xctb.vercel.app/api/user/plans';
+const API_COMP_URL = 'https://mobile-recharge-portal-xctb.vercel.app/api/company/plans';
 
 const planService = {
     getAllPlans: async () => {
@@ -34,7 +34,7 @@ const planService = {
         return response.data;
     },
     getCompanies: async () => {
-        const response = await axios.get('http://localhost:5000/api/user/companies');
+        const response = await axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/user/companies');
         return response.data;
     }
 };

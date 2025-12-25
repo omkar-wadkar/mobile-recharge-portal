@@ -26,11 +26,11 @@ const AdminDashboard = () => {
     const fetchData = React.useCallback(async () => {
         try {
             const [sRes, uRes, cRes, pRes, tRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/admin/stats', { headers }),
-                axios.get('http://localhost:5000/api/admin/users', { headers }),
-                axios.get('http://localhost:5000/api/admin/companies', { headers }),
-                axios.get('http://localhost:5000/api/admin/plans', { headers }),
-                axios.get('http://localhost:5000/api/admin/transactions', { headers })
+                axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/admin/stats', { headers }),
+                axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/admin/users', { headers }),
+                axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/admin/companies', { headers }),
+                axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/admin/plans', { headers }),
+                axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/admin/transactions', { headers })
             ]);
             setStats(sRes.data);
             setUsers(uRes.data);
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
             setPlans(pRes.data);
             setTransactions(tRes.data);
 
-            const pendingRes = await axios.get('http://localhost:5000/api/admin/pending-providers', { headers });
+            const pendingRes = await axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/admin/pending-providers', { headers });
             setPendingProviders(pendingRes.data);
         } catch (err) {
             console.error(err);
@@ -51,39 +51,39 @@ const AdminDashboard = () => {
     }, [fetchData]);
 
     const toggleUser = async (id) => {
-        await axios.patch(`http://localhost:5000/api/admin/users/${id}/toggle`, {}, { headers });
+        await axios.patch(`https://mobile-recharge-portal-xctb.vercel.app/api/admin/users/${id}/toggle`, {}, { headers });
         fetchData();
     };
 
     const deleteUser = async (id) => {
         if (window.confirm('Are you sure you want to permanently delete this user?')) {
-            await axios.delete(`http://localhost:5000/api/admin/users/${id}`, { headers });
+            await axios.delete(`https://mobile-recharge-portal-xctb.vercel.app/api/admin/users/${id}`, { headers });
             fetchData();
         }
     };
 
     const toggleCompany = async (id) => {
-        await axios.patch(`http://localhost:5000/api/admin/companies/${id}/toggle`, {}, { headers });
+        await axios.patch(`https://mobile-recharge-portal-xctb.vercel.app/api/admin/companies/${id}/toggle`, {}, { headers });
         fetchData();
     };
 
     const deleteCompany = async (id) => {
         if (window.confirm('Are you sure? This is irreversible.')) {
-            await axios.delete(`http://localhost:5000/api/admin/companies/${id}`, { headers });
+            await axios.delete(`https://mobile-recharge-portal-xctb.vercel.app/api/admin/companies/${id}`, { headers });
             fetchData();
         }
     };
 
     const handleProviderStatus = async (id, status) => {
         if (window.confirm(`Are you sure you want to ${status} this provider?`)) {
-            await axios.put(`http://localhost:5000/api/admin/provider-status/${id}`, { status }, { headers });
+            await axios.put(`https://mobile-recharge-portal-xctb.vercel.app/api/admin/provider-status/${id}`, { status }, { headers });
             fetchData();
         }
     };
 
     const handleCreateCompany = async (e) => {
         e.preventDefault();
-        await axios.post('http://localhost:5000/api/admin/companies', newComp, { headers });
+        await axios.post('https://mobile-recharge-portal-xctb.vercel.app/api/admin/companies', newComp, { headers });
         setNewComp({ name: '', description: '', contactEmail: '' });
         setShowCompanyModal(false);
         fetchData();
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
 
     const handleCreateUser = async (e) => {
         e.preventDefault();
-        await axios.post('http://localhost:5000/api/admin/users', newUser, { headers });
+        await axios.post('https://mobile-recharge-portal-xctb.vercel.app/api/admin/users', newUser, { headers });
         setNewUser({ name: '', email: '', password: '', role: 'USER', mobile: '' });
         setShowUserModal(false);
         fetchData();

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/user/recharge';
+const API_URL = 'https://mobile-recharge-portal-xctb.vercel.app/api/user/recharge';
 
 const paymentService = {
     initiatePayment: async (paymentData) => {
@@ -26,7 +26,7 @@ const paymentService = {
     },
     getCompanyHistory: async () => {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/company/transactions', {
+        const response = await axios.get('https://mobile-recharge-portal-xctb.vercel.app/api/company/transactions', {
             headers: { Authorization: `Bearer ${token}` }
         });
         return response.data;

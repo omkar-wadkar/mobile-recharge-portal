@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://mobile-recharge-portal-xctb.vercel.app/api/auth';
 
 const authService = {
     register: async (userData) => {
