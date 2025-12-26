@@ -10,13 +10,15 @@ const {
     verifyOtpValidation,
     forgotPasswordValidation,
     verifyForgotOtpValidation,
-    resetPasswordValidation
+    resetPasswordValidation,
+    refreshTokenValidation
 } = require('../validators/auth.validation');
 const { validateRequest } = require('../Middleware/validateRequest');
 
 router.post('/register', registerValidation, validateRequest, register);
 router.post('/login', loginValidation, validateRequest, login);
 router.post('/google', googleLogin);
+router.post('/refresh-token', refreshTokenValidation, validateRequest, require('../Controller/authController').refreshToken);
 router.post('/request-otp', protect, requestOtpValidation, validateRequest, requestOTP);
 router.post('/verify-otp', protect, verifyOtpValidation, validateRequest, verifyOTP);
 

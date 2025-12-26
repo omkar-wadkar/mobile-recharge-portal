@@ -88,3 +88,10 @@ exports.resetPasswordValidation = [
         .notEmpty().withMessage('New Password is required')
         .isLength({ min: 6 }).withMessage('New Password must be at least 6 characters long')
 ];
+
+exports.refreshTokenValidation = [
+    body('refreshToken')
+        .trim()
+        .notEmpty().withMessage('Refresh Token is required')
+        .isJWT().withMessage('Invalid Refresh Token format')
+];
