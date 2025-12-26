@@ -15,7 +15,6 @@ const UserSchema = new mongoose.Schema({
     isActive: { type: Boolean, default: true },
     approvalStatus: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'APPROVED' },
     companyRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }, // If role is COMPANY
-    refreshToken: { type: String },
     createdAt: { type: Date, default: Date.now }
 });
 

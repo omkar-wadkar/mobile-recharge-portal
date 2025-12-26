@@ -8,7 +8,8 @@ exports.registerValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address'),
+        .isEmail().withMessage('Invalid email address')
+        .normalizeEmail(),
     body('password')
         .notEmpty().withMessage('Password is required')
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
@@ -32,7 +33,8 @@ exports.loginValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address'),
+        .isEmail().withMessage('Invalid email address')
+        .normalizeEmail(),
     body('password')
         .notEmpty().withMessage('Password is required')
 ];
@@ -61,13 +63,15 @@ exports.forgotPasswordValidation = [
         .trim()
         .notEmpty().withMessage('Email is required')
         .isEmail().withMessage('Invalid email address')
+        .normalizeEmail()
 ];
 
 exports.verifyForgotOtpValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address'),
+        .isEmail().withMessage('Invalid email address')
+        .normalizeEmail(),
     body('otp')
         .trim()
         .notEmpty().withMessage('OTP is required')
@@ -83,11 +87,4 @@ exports.resetPasswordValidation = [
     body('newPassword')
         .notEmpty().withMessage('New Password is required')
         .isLength({ min: 6 }).withMessage('New Password must be at least 6 characters long')
-];
-
-exports.refreshTokenValidation = [
-    body('refreshToken')
-        .trim()
-        .notEmpty().withMessage('Refresh Token is required')
-        .isJWT().withMessage('Invalid Refresh Token format')
 ];

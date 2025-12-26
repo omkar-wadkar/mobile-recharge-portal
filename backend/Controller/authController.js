@@ -4,22 +4,14 @@ const bcrypt = require('bcryptjs');
 const { verifyGoogleToken } = require('../Service/oauthService');
 const { generateOTP, sendEmailOTP, sendMobileOTP, verifyOTP } = require('../Service/otpService');
 
-const generateAccessAndRefreshTokens = async (user) => {
-    const payload = {
+const generateToken = (user) => {
+    return jwt.sign({
         id: user._id,
         role: user.role,
         companyRef: user.companyRef,
         name: user.name,
         isVerified: user.isVerified
-    };
-
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    return { accessToken, refreshToken };
+    }, process.env.JWT_SECRET, { expiresIn: '1d' });
 };
 
 exports.register = async (req, res) => {
@@ -36,14 +28,14 @@ exports.register = async (req, res) => {
         const otp = generateOTP(email);
         await sendEmailOTP(email, otp);
 
-        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user);
+        const token = generateToken(user);
 
         let message = 'Registration successful';
         if (approvalStatus === 'PENDING') {
             message = 'Registration successful. Please wait for admin approval.';
         }
 
-        res.status(201).json({ accessToken, refreshToken, user: { id: user._id, name, email, role, approvalStatus }, message });
+        res.status(201).json({ token, user: { id: user._id, name, email, role, approvalStatus }, message });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ message: error.message });
@@ -67,8 +59,8 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user);
-        res.json({ accessToken, refreshToken, user: { id: user._id, name: user.name, email, role: user.role } });
+        const token = generateToken(user);
+        res.json({ token, user: { id: user._id, name: user.name, email, role: user.role } });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -92,8 +84,8 @@ exports.googleLogin = async (req, res) => {
             await user.save();
         }
 
-        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user);
-        res.json({ accessToken, refreshToken, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+        const token = generateToken(user);
+        res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -125,8 +117,8 @@ exports.verifyOTP = async (req, res) => {
             user.isVerified[type] = true;
             await user.save();
 
-            const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user);
-            return res.json({ message: `${type} verified successfully`, isVerified: user.isVerified, accessToken, refreshToken });
+            const token = generateToken(user);
+            return res.json({ message: `${type} verified successfully`, isVerified: user.isVerified, token });
         }
         res.status(400).json({ message: 'Invalid or expired OTP' });
     } catch (error) {
@@ -188,24 +180,5 @@ exports.resetPassword = async (req, res) => {
         res.json({ message: 'Password reset successful' });
     } catch (error) {
         res.status(500).json({ message: 'Invalid or expired token' });
-    }
-};
-
-exports.refreshToken = async (req, res) => {
-    try {
-        const { refreshToken } = req.body;
-        if (!refreshToken) return res.status(401).json({ message: 'Refresh Token is required' });
-
-        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.id);
-
-        if (!user || user.refreshToken !== refreshToken) {
-            return res.status(403).json({ message: 'Invalid Refresh Token' });
-        }
-
-        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(user);
-        res.json({ accessToken, refreshToken: newRefreshToken });
-    } catch (error) {
-        res.status(403).json({ message: 'Invalid or expired Refresh Token' });
     }
 };
