@@ -8,8 +8,8 @@ exports.registerValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address')
-        .normalizeEmail(),
+        .isEmail().withMessage('Invalid email address'),
+
     body('password')
         .notEmpty().withMessage('Password is required')
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
@@ -33,8 +33,8 @@ exports.loginValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address')
-        .normalizeEmail(),
+        .isEmail().withMessage('Invalid email address'),
+
     body('password')
         .notEmpty().withMessage('Password is required')
 ];
@@ -62,16 +62,16 @@ exports.forgotPasswordValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address')
-        .normalizeEmail()
+        .isEmail().withMessage('Invalid email address'),
+
 ];
 
 exports.verifyForgotOtpValidation = [
     body('email')
         .trim()
         .notEmpty().withMessage('Email is required')
-        .isEmail().withMessage('Invalid email address')
-        .normalizeEmail(),
+        .isEmail().withMessage('Invalid email address'),
+
     body('otp')
         .trim()
         .notEmpty().withMessage('OTP is required')
