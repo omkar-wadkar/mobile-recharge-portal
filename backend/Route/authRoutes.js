@@ -3,15 +3,26 @@ const router = express.Router();
 const { register, login, googleLogin, requestOTP, verifyOTP, forgotPassword, verifyForgotOTP, resetPassword } = require('../Controller/authController');
 const { protect } = require('../Middleware/authMiddleware');
 
-router.post('/register', register);
-router.post('/login', login);
+const {
+    registerValidation,
+    loginValidation,
+    requestOtpValidation,
+    verifyOtpValidation,
+    forgotPasswordValidation,
+    verifyForgotOtpValidation,
+    resetPasswordValidation
+} = require('../validators/auth.validation');
+const { validateRequest } = require('../Middleware/validateRequest');
+
+router.post('/register', registerValidation, validateRequest, register);
+router.post('/login', loginValidation, validateRequest, login);
 router.post('/google', googleLogin);
-router.post('/request-otp', protect, requestOTP);
-router.post('/verify-otp', protect, verifyOTP);
+router.post('/request-otp', protect, requestOtpValidation, validateRequest, requestOTP);
+router.post('/verify-otp', protect, verifyOtpValidation, validateRequest, verifyOTP);
 
 // Forgot Password Flow
-router.post('/forgot-password', forgotPassword);
-router.post('/verify-forgot-otp', verifyForgotOTP);
-router.post('/reset-password', resetPassword);
+router.post('/forgot-password', forgotPasswordValidation, validateRequest, forgotPassword);
+router.post('/verify-forgot-otp', verifyForgotOtpValidation, validateRequest, verifyForgotOTP);
+router.post('/reset-password', resetPasswordValidation, validateRequest, resetPassword);
 
 module.exports = router;
