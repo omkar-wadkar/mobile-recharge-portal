@@ -5,7 +5,7 @@ const TransactionSchema = new mongoose.Schema({
     plan: { type: mongoose.Schema.Types.ObjectId, ref: 'Plan', required: true },
     company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
     amount: { type: Number, required: true },
-    paymentMethod: { type: String, enum: ['CARD', 'UPI'], required: true },
+    paymentMethod: { type: String, enum: ['CARD', 'UPI', 'RAZORPAY'], required: true },
     transactionStatus: { type: String, enum: ['SUCCESS', 'FAILURE', 'PENDING'], default: 'PENDING' },
     paymentDetails: {
         last4: { type: String },

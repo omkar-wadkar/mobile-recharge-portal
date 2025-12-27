@@ -44,7 +44,7 @@ const createPaymentOrder = async (req, res) => {
 
     } catch (error) {
         console.error('Create Order Error:', error);
-        res.status(500).json({ message: 'Failed to create payment order' });
+        res.status(500).json({ message: 'Failed to create payment order', error: error.message });
     }
 };
 
