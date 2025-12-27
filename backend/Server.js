@@ -7,6 +7,7 @@ const authRoutes = require('./Route/authRoutes');
 const adminRoutes = require('./Route/adminRoutes');
 const companyRoutes = require('./Route/companyRoutes');
 const userRoutes = require('./Route/userRoutes');
+const paymentRoutes = require('./Route/paymentRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/company', companyRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)

@@ -11,6 +11,8 @@ const TransactionSchema = new mongoose.Schema({
         last4: { type: String },
         upiId: { type: String }
     },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
     referralCode: { type: String },
     createdAt: { type: Date, default: Date.now }
 });

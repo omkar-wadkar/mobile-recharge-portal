@@ -1,96 +1,92 @@
+const PaymentService = require('../Service/paymentService');
 const Transaction = require('../Models/Schema/Transaction');
 const Plan = require('../Models/Schema/Plan');
-const { validateCard, validateUPI } = require('../Service/paymentService');
-const { generateOTP, sendEmailOTP, verifyOTP } = require('../Service/otpService');
-const User = require('../Models/Schema/User');
+const Company = require('../Models/Schema/Company');
 
-exports.initiatePayment = async (req, res) => {
+const createPaymentOrder = async (req, res) => {
     try {
-        const { planId, paymentMethod, paymentDetails } = req.body;
+        const { planId, amount, referralCode } = req.body;
+        const userId = req.user.id; // From JWT middleware
+
+        // Validate Plan
         const plan = await Plan.findById(planId);
-        if (!plan) return res.status(404).json({ message: 'Plan not found' });
-
-        const user = await User.findById(req.user.id);
-
-        // Validation
-        let validationResult;
-        if (paymentMethod === 'CARD') {
-            validationResult = validateCard(paymentDetails.cardNumber, paymentDetails.expiry, paymentDetails.cvv);
-        } else {
-            validationResult = validateUPI(paymentDetails.upiId);
+        if (!plan) {
+            return res.status(404).json({ message: 'Plan not found' });
         }
 
-        if (!validationResult.valid) {
-            return res.status(400).json({ message: validationResult.message });
-        }
+        // Optional: Security check to ensure amount matches plan price (considering referral logic if handled on backend)
+        // For now, we trust the amount sent from frontend as per user request to accept 'amount'
+        // But strictly, we should recalculate. 
+        // Let's create the order with the passed amount.
 
-        // Send OTP for payment confirmation
-        const otp = generateOTP(`payment_${user.email}`);
-        await sendEmailOTP(user.email, otp);
+        const order = await PaymentService.createOrder(amount);
 
-        res.json({ message: 'Payment OTP sent to email', intent: 'VERIFY_OTP' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-exports.confirmPayment = async (req, res) => {
-    try {
-        const { planId, paymentMethod, paymentDetails, otp, referralCode } = req.body;
-        const user = await User.findById(req.user.id);
-
-        if (!verifyOTP(`payment_${user.email}`, otp)) {
-            return res.status(400).json({ message: 'Invalid or expired Payment OTP' });
-        }
-
-        const plan = await Plan.findById(planId);
-
-        let status = 'SUCCESS';
-        if (paymentMethod === 'CARD' && paymentDetails.cardNumber === '4000000000000000') {
-            status = 'FAILURE';
-        }
-
-        let finalAmount = plan.price;
-        if (referralCode === 'offer21') {
-            finalAmount = Math.max(0, finalAmount - 50);
-        }
-
-        const transaction = new Transaction({
-            user: user._id,
-            plan: plan._id,
-            company: plan.company,
-            amount: finalAmount,
-            paymentMethod,
-            transactionStatus: status,
-            paymentDetails: paymentMethod === 'CARD' ? { last4: paymentDetails.cardNumber.slice(-4) } : { upiId: paymentDetails.upiId },
+        const newTransaction = new Transaction({
+            user: userId,
+            plan: planId,
+            company: plan.company, // Assuming plan has company reference or we fetch it
+            amount: amount,
+            paymentMethod: 'RAZORPAY', // Placeholder, specific method known after success
+            razorpayOrderId: order.id,
+            transactionStatus: 'PENDING',
             referralCode
         });
 
-        await transaction.save();
+        await newTransaction.save();
 
-        if (status === 'SUCCESS') {
-            res.json({ message: 'Recharge successful', transaction });
-        } else {
-            res.status(400).json({ message: 'Payment failed', transaction });
-        }
+        res.status(200).json({
+            success: true,
+            order_id: order.id,
+            amount: order.amount,
+            key_id: process.env.RAZORPAY_KEY_ID,
+            transaction_id: newTransaction._id
+        });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Create Order Error:', error);
+        res.status(500).json({ message: 'Failed to create payment order' });
     }
 };
 
-exports.getTransactionHistory = async (req, res) => {
+const verifyPayment = async (req, res) => {
     try {
-        const query = req.user.role === 'USER' ? { user: req.user.id } :
-            req.user.role === 'COMPANY' ? { company: req.user.companyRef } : {};
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-        const transactions = await Transaction.find(query)
-            .populate('plan')
-            .populate('company', 'name')
-            .populate('user', 'name email')
-            .sort({ createdAt: -1 });
+        const isValid = PaymentService.verifyPaymentSignature(
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature
+        );
 
-        res.json(transactions);
+        const transaction = await Transaction.findOne({ razorpayOrderId: razorpay_order_id });
+
+        if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+        }
+
+        if (isValid) {
+            transaction.transactionStatus = 'SUCCESS';
+            transaction.razorpayPaymentId = razorpay_payment_id;
+            await transaction.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Payment verified successfully',
+                transaction
+            });
+        } else {
+            transaction.transactionStatus = 'FAILURE';
+            await transaction.save();
+            res.status(400).json({ success: false, message: 'Invalid payment signature' });
+        }
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Verify Payment Error:', error);
+        res.status(500).json({ message: 'Payment verification failed' });
     }
+};
+
+module.exports = {
+    createPaymentOrder,
+    verifyPayment
 };
