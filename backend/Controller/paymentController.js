@@ -99,8 +99,25 @@ const getTransactionHistory = async (req, res) => {
     }
 };
 
+const getCompanyTransactions = async (req, res) => {
+    try {
+        if (!req.user.companyRef) {
+            return res.status(400).json({ message: 'No company assigned to this user' });
+        }
+        const transactions = await Transaction.find({ company: req.user.companyRef })
+            .populate('user', 'name email mobile')
+            .populate('plan')
+            .sort({ createdAt: -1 });
+        res.json(transactions);
+    } catch (error) {
+        console.error('Company History Error:', error);
+        res.status(500).json({ message: 'Failed to fetch company transactions' });
+    }
+};
+
 module.exports = {
     createPaymentOrder,
     verifyPayment,
-    getTransactionHistory
+    getTransactionHistory,
+    getCompanyTransactions
 };
